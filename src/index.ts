@@ -49,7 +49,6 @@ const corsOptions = {
   origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000', 'http://localhost:5173', 'https://department-opinion-poll-system-a3sn.vercel.app']
 };
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 // File Upload Configuration
 app.use(fileUpload({
