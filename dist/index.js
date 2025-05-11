@@ -3,13 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("module-alias/register");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const mongoose_1 = require("mongoose");
 const dotenv_1 = __importDefault(require("dotenv"));
-const Routes_1 = __importDefault(require("./src/routes/Routes"));
+const Routes_1 = __importDefault(require("@routes/Routes"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
-const errorMiddleware_1 = require("./src/middleware/errorMiddleware");
+const errorMiddleware_1 = require("@middleware/errorMiddleware");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 // Load environment variables from .env file

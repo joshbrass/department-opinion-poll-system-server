@@ -73,7 +73,12 @@ const addPoll = async (req, res, next) => {
             // Fallback to temp file if buffer is empty
             else if (thumbnail.tempFilePath) {
                 tempFilePath = thumbnail.tempFilePath;
-                imageBuffer = await promises_1.default.readFile(tempFilePath);
+                try {
+                    imageBuffer = await promises_1.default.readFile(tempFilePath);
+                }
+                catch (readError) {
+                    throw new Error(`Failed to read temp file: ${readError instanceof Error ? readError.message : 'Unknown error'}`);
+                }
             }
             // Final fallback to base64 conversion
             else {
