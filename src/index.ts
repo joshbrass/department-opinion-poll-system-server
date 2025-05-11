@@ -46,7 +46,7 @@ app.use(express.urlencoded({
 // CORS Configuration
 const corsOptions = {
   credentials: true,
-  origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000', 'http://localhost:5173']
+  origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000', 'http://localhost:5173', 'https://department-opinion-poll-system-a3sn.vercel.app']
 };
 app.use(cors(corsOptions));
 
