@@ -91,19 +91,23 @@ export const addPoll = async (
     let tempFilePath: string | undefined;
 
     try {
-      // Try to use in-memory buffer first
-      if (thumbnail.data && thumbnail.data.length > 0) {
-        imageBuffer = thumbnail.data;
-      } 
-      // Fallback to temp file if buffer is empty
-      else if (thumbnail.tempFilePath) {
-        tempFilePath = thumbnail.tempFilePath;
-        imageBuffer = await fs.readFile(tempFilePath);
-      } 
-      // Final fallback to base64 conversion
-      else {
-        throw new Error("No usable file data found");
-      }
+  // Try to use in-memory buffer first
+  if (thumbnail.data && thumbnail.data.length > 0) {
+    imageBuffer = thumbnail.data;
+  } 
+  // Fallback to temp file if buffer is empty
+  else if (thumbnail.tempFilePath) {
+    tempFilePath = thumbnail.tempFilePath;
+    try {
+      imageBuffer = await fs.readFile(tempFilePath);
+    } catch (readError) {
+      throw new Error(`Failed to read temp file: ${readError instanceof Error ? readError.message : 'Unknown error'}`);
+    }
+  }
+  // Final fallback to base64 conversion
+  else {
+    throw new Error("No usable file data found");
+  }
 
       // Create poll with image data
       const newPoll = await Poll.create({
