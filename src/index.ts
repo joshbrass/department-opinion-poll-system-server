@@ -48,7 +48,9 @@ const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://department-opinion-poll-system-a3sn.vercel.app',
-  'https://department-opinion-poll-system-server.onrender.com' // Added for Render
+  'https://department-opinion-poll-system-server.onrender.com',
+  'https://charming-bombolone-11c4f6.netlify.app'
+  
 ];
 
 const corsOptions: cors.CorsOptions = {
