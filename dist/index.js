@@ -42,11 +42,29 @@ app.use(express_1.default.urlencoded({
     limit: process.env.URLENCODED_LIMIT || '10mb'
 }));
 // CORS Configuration
+const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://department-opinion-poll-system-a3sn.vercel.app',
+    'https://department-opinion-poll-system-server.onrender.com' // Added for Render
+];
 const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            console.error(`🚫 Blocked by CORS: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
-    origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000', 'http://localhost:5173', 'https://department-opinion-poll-system-a3sn.vercel.app']
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    optionsSuccessStatus: 200
 };
-app.use((0, cors_1.default)(corsOptions));
+// Apply CORS middleware to /api routes only
+app.use('/api', (0, cors_1.default)(corsOptions));
 // File Upload Configuration
 app.use((0, express_fileupload_1.default)({
     useTempFiles: true,
@@ -73,8 +91,14 @@ app.get('/health', (req, res) => {
         environment: process.env.NODE_ENV || 'development'
     });
 });
-// API Routes
-app.use('/api', Routes_1.default);
+// API Routes - Add error handling for route registration
+try {
+    app.use('/api', Routes_1.default);
+}
+catch (error) {
+    console.error('❌ Failed to register routes:', error);
+    process.exit(1);
+}
 // Error Handling Middleware
 app.use(errorMiddleware_1.notFound);
 app.use(errorMiddleware_1.errorHandler);
@@ -100,7 +124,7 @@ async function startServer() {
             console.log(`📁 Upload directory: ${uploadDir}`);
             console.log(`📁 Temp directory: ${tempDir}`);
             console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`🔄 CORS allowed origins: ${corsOptions.origin.join(', ')}`);
+            console.log(`🔄 CORS allowed origins: ${allowedOrigins.join(', ')}`);
         });
         // Graceful shutdown
         process.on('SIGTERM', () => {

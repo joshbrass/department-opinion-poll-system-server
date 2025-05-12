@@ -11,7 +11,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        id: Types.ObjectId; // make this an ObjectId, not a string
+        id: Types.ObjectId; 
         isAdmin: boolean;
       };
       files?: FileArray;

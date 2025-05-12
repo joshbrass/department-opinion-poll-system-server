@@ -1,5 +1,5 @@
 import 'module-alias/register';
-import express, { Application } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { connect } from "mongoose";
 import dotenv from "dotenv";
@@ -44,11 +44,30 @@ app.use(express.urlencoded({
 }));
 
 // CORS Configuration
-const corsOptions = {
+const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://department-opinion-poll-system-a3sn.vercel.app',
+  'https://department-opinion-poll-system-server.onrender.com' // Added for Render
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error(`🚫 Blocked by CORS: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000', 'http://localhost:5173', 'https://department-opinion-poll-system-a3sn.vercel.app']
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));
+
+// Apply CORS middleware to /api routes only
+app.use('/api', cors(corsOptions));
 
 // File Upload Configuration
 app.use(fileUpload({
@@ -69,7 +88,7 @@ app.use(fileUpload({
 app.use("/uploads", express.static(uploadDir));
 
 // Health Check Endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ 
     status: 'healthy',
     serverTime: new Date().toISOString(),
@@ -79,8 +98,13 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
-app.use('/api', Routes);
+// API Routes - Add error handling for route registration
+try {
+  app.use('/api', Routes);
+} catch (error) {
+  console.error('❌ Failed to register routes:', error);
+  process.exit(1);
+}
 
 // Error Handling Middleware
 app.use(notFound);
@@ -111,7 +135,7 @@ async function startServer() {
       console.log(`📁 Upload directory: ${uploadDir}`);
       console.log(`📁 Temp directory: ${tempDir}`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔄 CORS allowed origins: ${corsOptions.origin.join(', ')}`);
+      console.log(`🔄 CORS allowed origins: ${allowedOrigins.join(', ')}`);
     });
 
     // Graceful shutdown
